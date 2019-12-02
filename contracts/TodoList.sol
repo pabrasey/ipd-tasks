@@ -58,6 +58,7 @@ contract TodoList {
 	function createTask(string memory _title, string memory _description) public {
 		uint8 _id = task_count;
 		Task memory task = Task(_id, _title, _description, State.created, 0, 0, new address[](0), new address[](0));
+		// https://medium.com/loom-network/ethereum-solidity-memory-vs-storage-how-to-initialize-an-array-inside-a-struct-184baf6aa2eb
 		tasks[_id] = task;
 		task_count++;
 		tasks[_id].validators.push(msg.sender);
