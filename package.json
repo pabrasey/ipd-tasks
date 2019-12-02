@@ -1,7 +1,7 @@
 {
-  "name": "eth-todo-list",
+  "name": "ipd-tasks",
   "version": "1.0.0",
-  "description": "Blockchain Todo List Powered By Ethereum",
+  "description": "Task management for IPD projects in construction",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
@@ -10,7 +10,7 @@
     "dev": "lite-server",
     "test": "echo \"Error: no test specified\" && sexit 1"
   },
-  "author": "gregory@dappuniversity.com",
+  "author": "pabrasey@gmail.com",
   "license": "ISC",
   "devDependencies": {
     "bootstrap": "^4.3.1",
@@ -19,11 +19,23 @@
     "chai-bignumber": "^2.0.2",
     "lite-server": "^2.3.0",
     "nodemon": "^1.17.3",
-    "truffle": "5.0.2",
+    "truffle": "5.1.2",
     "truffle-contract": "3.0.6"
   },
   "dependencies": {
     "jquery": "^3.4.0",
-    "popper.js": "^1.15.0"
-  }
+    "popper.js": "^1.15.0",
+    "truffle-assertions": "^0.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pabrasey/ipd-tasks.git"
+  },
+  "keywords": [
+    "solidity"
+  ],
+  "bugs": {
+    "url": "https://github.com/pabrasey/ipd-tasks/issues"
+  },
+  "homepage": "https://github.com/pabrasey/ipd-tasks#readme"
 }
