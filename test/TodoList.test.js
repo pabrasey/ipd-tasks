@@ -27,7 +27,7 @@ contract('TodoList', (accounts) => {
     const task = await this.todolist.tasks(0)
     const task_count = await this.todolist.task_count()
     assert.equal(task_count.toNumber(), 1)
-    // assert.equal(this.todolist.getValidators(0)[0], accounts[0]) -> doesn't work !!??
+    // debug  ( assert.equal(this.todolist.getValidators(0)[0], accounts[0]) );
 
     // check the event
     const event = result.logs[0].args
