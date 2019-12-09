@@ -2,7 +2,7 @@ pragma solidity ^0.5.11;
 
 import '../node_modules/@openzeppelin/contracts/payment/escrow/Escrow.sol';
 
-contract Task {
+contract Task{
 	enum State { created, accepted, completed, reviewed }
 	uint8[] ratings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 	// enum Difficulty { standard, advanced , expert }
@@ -16,9 +16,22 @@ contract Task {
 	uint8 rating;
 	address[] validators;
 	address[] workers;
+	address payable payee;
 	Escrow escrow;
 	//uint predecessor_id;
 	//uint successor_id;
+
+	modifier validatorsOnly() {
+		// checks that the sender is a validator of task with id _id
+		bool is_validator = false;
+		for (uint8 _i = 0; _i < validators.length; _i++) {
+			if (msg.sender == validators[_i]) {
+				is_validator = true;
+			}
+		}
+		require(is_validator == true, "caller is not a validator of this task");
+		_;
+	}
 
 	event TaskCreated(
 		uint id,
@@ -28,19 +41,6 @@ contract Task {
 	);
 
 	event Test(bool is_true);
-
-	modifier validatorsOnly() {
-		// checks that the sender is a validator of task with id _id
-		bool is_validator = false;
-		address[] memory _validators = this.validators;
-		for (uint8 _i = 0; _i < _validators.length; _i++) {
-			if (msg.sender == _validators[_i]) {
-				is_validator = true;
-			}
-		}
-		require(is_validator == true, "caller is not a validator of this task");
-		_;
-	}
 
 	event TaskState(
 		uint8 id,
@@ -60,48 +60,48 @@ contract Task {
 	event taskFunded(
 		uint8 task_id,
 		address sender,
-		address receiver,
+		address payee,
 		uint256 amount
 	);
 
-	function createTask(string memory _title, string memory _description) public {
-		uint8 _id = task_count;
-		Task memory task = Task(_id, _title, _description, State.created, 0, 0, new address[](0), new address[](0), new Escrow());
+	constructor(uint8 _id, string memory _title, string memory _description) public {
+		id = _id;
+		title = _title;
+		description = _description;
+		state = State.created;
+		// new address[](0)
 		// https://medium.com/loom-network/ethereum-solidity-memory-vs-storage-how-to-initialize-an-array-inside-a-struct-184baf6aa2eb
-		tasks[_id] = task;
-		task_count++;
-		tasks[_id].validators.push(msg.sender);
-		emit TaskCreated(_id, _title, State.created, tasks[_id].validators);
+		validators.push(msg.sender);
+		escrow = new Escrow();
+		emit TaskCreated(_id, _title, State.created, validators);
 	}
 
-	function getValidators(uint8 _id) public view returns (address[] memory) {
-		return tasks[_id].validators;
+	function getValidators() public view returns (address[] memory) {
+		return validators;
 	}
 
-	function addValidator(uint8 _task_id, address _validator) public validatorsOnly(_task_id) {
-		Task storage _task = tasks[_task_id];
-		_task.validators.push(_validator);
-		emit validatorAdded(_task_id, _validator);
+	function addValidator(address _validator) public validatorsOnly {
+		validators.push(_validator);
+		emit validatorAdded(id, _validator);
 	}
 
-	function addWorker(uint8 _task_id, address _worker) public validatorsOnly(_task_id) {
-		Task storage _task = tasks[_task_id];
-		_task.workers.push(_worker);
-		emit workerAdded(_task_id, _worker);
+	function addWorker(address _worker) public validatorsOnly {
+		workers.push(_worker);
+		emit workerAdded(id, _worker);
 	}
 
-	function fundTaskEscrow(uint8 _task_id) public payable {
+	function addPayee(address payable _payee) public {
+		payee = _payee;
+	}
+
+	function fundTaskEscrow() public payable {
 		// stores funds for the given task its corresponding escrow
-		Task storage _task = tasks[_task_id];
-
-		_task.escrow.deposit.value(msg.value)(_task.workers[0]);
-		// the 1st worker will get the payment -> add split payment later
-		emit taskFunded(_task_id, msg.sender, _task.workers[0], msg.value);
+		escrow.deposit.value(msg.value)(payee);
+		emit taskFunded({task_id: id, sender: msg.sender, payee: payee, amount: msg.value});
 	}
 
-	function getTaskDeposit(uint8 _task_id) public view returns (uint256) {
-		Task memory _task = tasks[_task_id];
-		return _task.escrow.depositsOf(_task.workers[0]);
+	function getTaskDeposit() public view returns (uint256) {
+		return escrow.depositsOf(payee);
 	}
 
 	function acceptTask(uint _id) public {
@@ -116,11 +116,10 @@ contract Task {
 
 	}
 
-	function toggleStarted(uint8 _id) public {
-		Task storage _task = tasks[_id];
-		_task.state = State.accepted;
+	function toggleStarted() public {
+		state = State.accepted;
 		// tasks[_id] = _task;
-		emit TaskState(_id, _task.state);
+		emit TaskState({id: id, state: state});
 	}
 
 }

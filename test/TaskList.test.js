@@ -1,28 +1,37 @@
 // @ts-nocheck
-const Task = artifacts.require('./Task.sol')
+const TaskList = artifacts.require('./TaskList.sol')
 
 const truffleAssert = require('truffle-assertions');
 
-contract('Task', (accounts) => {
+contract('TaskList', (accounts) => {
 
   const validator_0 = accounts[0];
   const validator_1 = accounts[1];
   const worker_1 = accounts[2];
   const worker_2 = accounts[3];
-  const payee_1 = accounts[4];
 
   before(async () => {
-    this.task = await Task.new(0, 'A new task', "description");
-
+    this.tasklist = await TaskList.deployed()
   })
- 
-  it('creates tasks', async () => {
 
+  it('deploys successfully', async () => {
+    const address = await this.tasklist.address
+    assert.notEqual(address, 0x0)
+    assert.notEqual(address, '')
+    assert.notEqual(address, null)
+    assert.notEqual(address, undefined)
+  })
+
+  
+  it('creates tasks', async () => {
+    const result = await this.tasklist.createTask('A new task', "description")
     // debug  ( assert.equal(this.task.getValidators(0)[0], accounts[0]) );
-    let result = await truffleAssert.createTransactionResult(this.task, this.task.transactionHash);
-    truffleAssert.eventEmitted(result, 'TaskCreated');
+
     // check the event
-    /*
+    console.log(result);
+
+    truffleAssert.eventEmitted(result, 'TaskCreated');
+/*
     const event = result.logs[0].args
     assert.equal(event.id.toNumber(), 0)
     assert.equal(event.title, 'A new task')
@@ -30,6 +39,7 @@ contract('Task', (accounts) => {
     assert.equal(event.validators[0], accounts[0])*/
   })
 
+  /*
   it('adds validator from the allowed accounts', async () => {
     // validator adds new validator
     let result_1 = await this.task.addValidator(validator_1, {from: validator_0});
@@ -59,15 +69,11 @@ contract('Task', (accounts) => {
     );
   })
 
-  it('adds payee', async () => {
-    await this.task.addPayee(payee_1);
-    this.task.payee = payee_1;
-  })
-  
+  /*
   it('funds task', async () => {
     const amount = web3.utils.toWei('10', "ether");
     const balance_before = await web3.eth.getBalance(validator_1);
-    let result = await this.task.fundTaskEscrow({from: validator_1, value: amount, gasPrice:0});
+    let result = await this.task.fundTaskEscrow(0, {from: validator_1, value: amount, gasPrice:0});
 
     // check account balance
     const balance_after = await web3.eth.getBalance(validator_1);
@@ -75,11 +81,10 @@ contract('Task', (accounts) => {
     assert.equal(value, amount);
 
     // check deposited amount
-    let deposit = await this.task.getTaskDeposit();
+    let deposit = await this.task.getTaskDeposit(0);
     assert.equal(deposit, amount);
   })
 
-  /*
   it('toggles task started', async () => {
     const task_id = 1
     const result = await this.task.toggleStarted(task_id) // starts the task
@@ -94,5 +99,4 @@ contract('Task', (accounts) => {
     assert.equal(event.state.toNumber(), 1) // check event task state
   })
   */
-  
 })
