@@ -2,28 +2,23 @@ pragma solidity ^0.5.11;
 
 import '../node_modules/@openzeppelin/contracts/payment/escrow/Escrow.sol';
 
-contract TodoList {
-	uint8 public task_count = 0;
+contract Task {
 	enum State { created, accepted, completed, reviewed }
 	uint8[] ratings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 	// enum Difficulty { standard, advanced , expert }
 	// enum Uncertainity { clear, uncertain, unknown }
 
-	struct Task {
-		uint8 id;
-		string title;
-		string description;
-		State state;
-		uint deadline;
-		uint8 rating;
-		address[] validators;
-		address[] workers;
-		Escrow escrow;
-		//uint predecessor_id;
-		//uint successor_id;
-	}
-
-	mapping(uint => Task) public tasks;
+	uint8 id;
+	string title;
+	string description;
+	State state;
+	uint deadline;
+	uint8 rating;
+	address[] validators;
+	address[] workers;
+	Escrow escrow;
+	//uint predecessor_id;
+	//uint successor_id;
 
 	event TaskCreated(
 		uint id,
@@ -34,10 +29,10 @@ contract TodoList {
 
 	event Test(bool is_true);
 
-	modifier validatorsOnly(uint8 _id) {
+	modifier validatorsOnly() {
 		// checks that the sender is a validator of task with id _id
 		bool is_validator = false;
-		address[] memory _validators = tasks[_id].validators;
+		address[] memory _validators = this.validators;
 		for (uint8 _i = 0; _i < _validators.length; _i++) {
 			if (msg.sender == _validators[_i]) {
 				is_validator = true;
