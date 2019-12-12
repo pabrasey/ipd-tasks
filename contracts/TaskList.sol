@@ -16,4 +16,7 @@ contract TaskList{
         return task;
     }
 
+    function getTask(uint8 _id) public view returns (Task) {
+        return tasks[_id];
+    }
 }
